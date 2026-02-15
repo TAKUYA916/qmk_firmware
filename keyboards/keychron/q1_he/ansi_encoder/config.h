@@ -20,7 +20,7 @@
 /* LED Current Configuration */
 #    define SNLED27351_CURRENT_TUNE \
         { 0x2C, 0x2C, 0x2C, 0x2C, 0x2C, 0x2C, 0x2C, 0x2C, 0x2C, 0x2C, 0x2C, 0x2C }
-		
+
 /* RGB Matrix Configuration */
 #    define RGB_MATRIX_LED_COUNT 81
 
@@ -33,3 +33,4 @@
 
 #endif
 
+#define DYNAMIC_KEYMAP_LAYER_COUNT 10  // 必要なレイヤー数に応じて増やす
