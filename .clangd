@@ -7,6 +7,12 @@ CompileFlags:
             -Wno-pointer-to-int-cast,
             -Wno-int-to-void-pointer-cast,
             -DPROGMEM=,
+            -D__GNUC__
+            -D__ARM_ARCH=7
+            -D__ARM_ARCH_7EM__
+            -D__thumb__
+            -mcpu=cortex-m4
+            -mthumb
         ]
     Remove:
         [
