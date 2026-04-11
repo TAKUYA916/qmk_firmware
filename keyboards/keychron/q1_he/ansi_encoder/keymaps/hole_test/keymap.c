@@ -19,6 +19,7 @@
 #include "quantum.h"  // QMKのコア機能（Tap Danceを含む）
 #include "analog_matrix.h"
 #include <stdint.h>
+#include "print.h"
 enum layers {
     LAYER_0,
     LAYER_1,
@@ -314,6 +315,8 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
 extern void host_mouse_send(report_mouse_t *report);
 
+extern uint16_t analog_matrix_get_value(uint8_t row, uint8_t col);
+
 void matrix_scan_user(void) {
     static uint16_t last_mouse_timer = 0;
     if (timer_elapsed(last_mouse_timer) < 10) {
@@ -328,37 +331,22 @@ void matrix_scan_user(void) {
         uint8_t val_s = analog_matrix_get_travel(3, 2);
         uint8_t val_d = analog_matrix_get_travel(3, 3);
 
+        // デバッグ出力: WASDそれぞれの生の値(value)と計算後の沈み込み量(travel)を表示
+        uprintf("W: %4u/%3u  A: %4u/%3u  S: %4u/%3u  D: %4u/%3u\n", 
+            analog_matrix_get_value(2, 2), val_w,
+            analog_matrix_get_value(3, 1), val_a,
+            analog_matrix_get_value(3, 2), val_s,
+            analog_matrix_get_value(3, 3), val_d);
+
         int8_t move_x = 0;
         int8_t move_y = 0;
 
-        // 速度計算ロジック:
-        // 0mm〜3.9mmまでは精密操作のため低速（以前のブースト式の半分）
-        // 4.0mm（底打ち）の瞬間のみ、以前のフルスピードに加速
-        
-        // W路
-        if (val_w > 0) {
-            int16_t s = (3 + (val_w / 10) + (uint32_t)val_w * val_w / 8000) / 2;
-            if (val_w >= 240) s *= 2; 
-            move_y -= (int8_t)s;
-        }
-        // S路
-        if (val_s > 0) {
-            int16_t s = (3 + (val_s / 10) + (uint32_t)val_s * val_s / 8000) / 2;
-            if (val_s >= 240) s *= 2; 
-            move_y += (int8_t)s;
-        }
-        // A路
-        if (val_a > 0) {
-            int16_t s = (3 + (val_a / 10) + (uint32_t)val_a * val_a / 8000) / 2;
-            if (val_a >= 240) s *= 2; 
-            move_x -= (int8_t)s;
-        }
-        // D路
-        if (val_d > 0) {
-            int16_t s = (3 + (val_d / 10) + (uint32_t)val_d * val_d / 8000) / 2;
-            if (val_d >= 240) s *= 2; 
-            move_x += (int8_t)s;
-        }
+        // デッドゾーン解消（0.1mm反応版）
+        // valが5（約0.1mm）を超えた瞬間から移動を開始
+        if (val_w > 5) move_y -= 2 + (val_w / 10) + ((uint32_t)val_w * val_w / 8000);
+        if (val_s > 5) move_y += 2 + (val_s / 10) + ((uint32_t)val_s * val_s / 8000);
+        if (val_a > 5) move_x -= 2 + (val_a / 10) + ((uint32_t)val_a * val_a / 8000);
+        if (val_d > 5) move_x += 2 + (val_d / 10) + ((uint32_t)val_d * val_d / 8000);
 
         if (move_x != 0 || move_y != 0) {
             report_mouse_t mouse_report = {0};
