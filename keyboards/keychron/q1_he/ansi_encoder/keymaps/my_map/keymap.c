@@ -1,4 +1,4 @@
-﻿/* Copyright 2024 @ Keychron (https://www.keychron.com)
+/* Copyright 2024 @ Keychron (https://www.keychron.com)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -242,7 +242,7 @@ bool rgb_matrix_indicators_user(void) {
     if (host_keyboard_led_state().caps_lock) {
         rgb_matrix_set_color(44, 255, 0, 255); // CAPSLOCKキー (index 44) を紫
     }
-    return false;
+    return true;
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
